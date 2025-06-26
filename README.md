@@ -1,4 +1,4 @@
-# Study Assistant Chatbot 🤖📚
+# Study Assistant Chatbot📚
 
 This is a web-based chatbot designed to assist students with study-related queries. It uses:
 
