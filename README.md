@@ -1,2 +1,9 @@
-# study-assistant-chatbot
-A smart study assistant chatbot built with React, Firebase Realtime Database, and Google Gemini API (gemini-1.5-flash). Supports real-time chatting, authentication, and intelligent responses using Gemini's generative capabilities.
+# Study Assistant Chatbot 🤖📚
+
+This is a web-based chatbot designed to assist students with study-related queries. It uses:
+
+- 🌐 React for the frontend
+- 🔥 Firebase for real-time chat and auth
+- 🧠 Google Gemini API (gemini-1.5-flash) for intelligent responses
+
+> Supports user authentication, real-time messaging, and AI-powered interactions with memory.
