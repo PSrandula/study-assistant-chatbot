@@ -13,6 +13,13 @@ export const getGeminiResponse = async (userMessage, history) => {
     },
   ];
 
+  const systemInstruction = {
+    role: "user",
+    parts: [{ 
+      text: "You are Mr. Pasindu, a study assistant. Your purpose is to help students with academic subjects. Respond ONLY to study-related questions. For non-study queries: 1. Politely decline 2. Remind about your study purpose 3. Ask for study questions. Keep non-study responses under 15 words. Study topics include: Math, Science, Languages, History, and exam preparation." 
+    }]
+  };
+
   try {
     const response = await fetch(
   `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
@@ -40,9 +47,9 @@ console.log("Gemini API Raw Response:", data);
       console.warn("No usable text response from Gemini:", data);
     }
 
-    return reply || "Gemini gave no response.";
+    return reply || "I can only answer study-related questions right now.";
   } catch (err) {
     console.error("Gemini API Error:", err);
-    return "Error: Failed to connect to Gemini.";
+    return "Error: Failed to connect to study assistant.";
   }
 };
