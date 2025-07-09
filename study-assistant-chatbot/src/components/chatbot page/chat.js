@@ -64,42 +64,94 @@ const Chat = () => {
   }, []);
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  if (!input.trim() || isLoading) return;
 
-    const user = auth.currentUser;
-    if (!user) {
-      alert("Please log in to send messages.");
-      return;
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please log in to send messages.");
+    return;
+  }
+
+  const isStudyRelated = () => {
+    const studyKeywords = [
+      // Academic subjects
+      'math', 'algebra', 'calculus', 'geometry', 'trigonometry',
+      'science', 'physics', 'chemistry', 'biology', 'astronomy',
+      'history', 'geography', 'civics', 'economics',
+      'language', 'grammar', 'vocabulary', 'literature', 'writing',
+      'computer', 'programming', 'coding', 'algorithm',
+      
+      // Study actions
+      'teach', 'explain', 'define', 'what is', 'how to', 'why does',
+      'calculate', 'solve', 'homework', 'assignment', 'exam', 'test',
+      'lesson', 'chapter', 'course', 'subject', 'study', 'learn',
+      'formula', 'equation', 'theory', 'concept'
+    ];
+
+    const greetingPattern = /^(hi|hello|hey|greetings|good\s(morning|afternoon|evening))[.!]*$/i;
+
+    if (greetingPattern.test(input.trim())) {
+      return "greeting";
     }
+  
+    return studyKeywords.some(keyword => 
+      input.toLowerCase().includes(keyword)
+    );
+  };
 
-    const userMessage = {
-      role: "user",
-      text: input,
-      sender: user.displayName || user.email || "Anonymous",
+  const validationResult = isStudyRelated();
+  
+
+  if (!validationResult) {
+    alert("I'm here to help with study-related questions only.\n\nPlease ask about:\n- Math problems\n- Science concepts\n- Language/grammar\n- History facts\n- Exam preparation");
+    return;
+  }
+
+  const userMessage = {
+    role: "user",
+    text: input,
+    sender: user.displayName || user.email || "Anonymous",
+    timestamp: Date.now()
+  };
+
+  await push(ref(db, "messages"), userMessage);
+  setInput("");
+  setIsLoading(true);
+  setIsTyping(true);
+
+  try {
+    let botReply;
+    
+   
+    if (validationResult === "greeting") {
+      botReply = "Hello! I'm Mr. Pasindu, your study assistant. How can I help with your studies today?";
+    } 
+   
+    else {
+      botReply = await getGeminiResponse(input, [...messages, userMessage]);
+    }
+    
+    const assistantMessage = {
+      role: "assistant",
+      text: botReply,
+      sender: "Mr. Pasindu",
       timestamp: Date.now()
     };
-
-    await push(ref(db, "messages"), userMessage);
-    setInput("");
-    setIsLoading(true);
-    setIsTyping(true);
-
-    try {
-      const botReply = await getGeminiResponse(input, [...messages, userMessage]);
-      const assistantMessage = {
-        role: "assistant",
-        text: botReply,
-        sender: "Mr. Pasindu",
-        timestamp: Date.now()
-      };
-      await push(ref(db, "messages"), assistantMessage);
-    } catch (error) {
-      console.error("Error sending message:", error);
-    } finally {
-      setIsLoading(false);
-      setIsTyping(false);
-    }
-  };
+    await push(ref(db, "messages"), assistantMessage);
+  } catch (error) {
+    console.error("Error sending message:", error);
+  
+    await push(ref(db, "messages"), {
+      role: "assistant",
+      text: "Sorry, I encountered an error. Please try a different study question.",
+      sender: "Mr. Pasindu",
+      timestamp: Date.now()
+    });
+  } finally {
+    setIsLoading(false);
+    setIsTyping(false);
+  }
+};
 
   return (
     <div className="chat-page">
